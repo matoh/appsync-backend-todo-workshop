@@ -1,6 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
+import { RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AccountRecovery, CfnUserPoolGroup, UserPool, UserPoolClient, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -33,6 +35,15 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
 
     const userPoolWebClient = new UserPoolClient(this, 'TodoUserPoolWebClient', {
       userPool
+    });
+
+    const todoDynamoDbTable = new Table(this, 'TodoDynamoDbTable', {
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING
+      }
     });
   }
 }

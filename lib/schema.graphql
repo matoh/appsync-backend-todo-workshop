@@ -1,0 +1,34 @@
+type Query {
+    getTodo(id: ID!): Todo @aws_api_key @aws_cognito_user_pools
+    listTodos: [Todo] @aws_api_key @aws_cognito_user_pools
+}
+
+type Mutation {
+    addTodo(input: TodoInput): Todo @aws_cognito_user_pools
+    updateTodo(input: TodoInput): Todo @aws_cognito_user_pools
+    deleteTodo(id: ID!): Todo @aws_cognito_user_pools(cognito_groups: ["Admin"])
+}
+
+type Subscription {
+    onAddTodo: Todo @aws_subscribe(mutations: ["addTodo"])
+}
+
+type Todo {
+    __typename: String!
+    id: ID
+    createdAt: AWSDate!
+    updatedAt: AWSDate!
+    name: String!
+    owner: String!
+    description: String
+}
+
+input TodoInput {
+    __typename: String!
+    id: ID
+    createdAt: AWSDate!
+    updatedAt: AWSDate!
+    name: String!
+    owner: String!
+    description: String
+}
