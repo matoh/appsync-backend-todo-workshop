@@ -1,8 +1,10 @@
-# Welcome to your CDK TypeScript project
+# Welcome to AppSync Backend Todo Workshop
 
-This is a blank project for CDK development with TypeScript.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Following services for the backend are used:
+* AWS CDK
+* AWS AppSync
+* AWS DynamoDB
+* AWS Cognito
 
 ## Useful commands
 
@@ -12,3 +14,8 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `cdk deploy`      deploy this stack to your default AWS account/region
 * `cdk diff`        compare deployed stack with current state
 * `cdk synth`       emits the synthesized CloudFormation template
+* `cdk destroy`     delete this stack
+
+## Prerequisites
+Create `.env` file as a copy of `.env.example` and fill AWS secrets.  
+
