@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { Duration, Expiration, RemovalPolicy } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Expiration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AccountRecovery, CfnUserPoolGroup, UserPool, UserPoolClient, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -118,5 +118,30 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
         requestMappingTemplate: MappingTemplate.dynamoDbDeleteItem('id', 'id'),
         responseMappingTemplate: MappingTemplate.dynamoDbResultItem()
       });
+
+    // Export variables needed for FrontEnd
+    // Pool Id
+    new CfnOutput(this, 'TodoUserPoolId', {
+      value: userPool.userPoolId,
+      description: 'Todo User Pool Id'
+    });
+
+    // User Pool Id
+    new CfnOutput(this, 'TodoUserPoolClientId', {
+      value: userPoolWebClient.userPoolClientId,
+      description: 'Todo User Pool Client Id'
+    });
+
+    // GraphQl Api Key
+    new CfnOutput(this, 'TodoGraphQlApiKey', {
+      value: appSyncApi.apiKey as string,
+      description: 'Todo GraphQl Api Key'
+    });
+
+    // GraphQl Api Id
+    new CfnOutput(this, 'TodoGraphQlApiId', {
+      value: appSyncApi.apiId,
+      description: 'Todo GraphQl Api Id'
+    });
   }
 }

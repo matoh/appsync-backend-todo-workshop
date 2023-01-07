@@ -8,7 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "dotenv -e .env cdk"
+    "cdk": "dotenv -e .env -- cdk",
+    "cdk:deploy-with-output": "dotenv -e .env -- cdk deploy --outputs-file ./cdk-outputs.json"
   },
   "devDependencies": {
     "@aws-cdk/aws-appsync-alpha": "^2.59.0-alpha.0",
