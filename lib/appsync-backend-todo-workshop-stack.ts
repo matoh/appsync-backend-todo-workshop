@@ -1,10 +1,20 @@
 import * as cdk from 'aws-cdk-lib';
 import { CfnOutput, Duration, Expiration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { AccountRecovery, CfnUserPoolGroup, UserPool, UserPoolClient, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import {
+  AccountRecovery,
+  CfnUserPoolGroup,
+  CfnUserPoolUICustomizationAttachment,
+  UserPool,
+  UserPoolClient,
+  UserPoolDomain,
+  VerificationEmailStyle
+} from 'aws-cdk-lib/aws-cognito';
+
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as path from 'path';
 import { AuthorizationType, FieldLogLevel, GraphqlApi, MappingTemplate, PrimaryKey, SchemaFile, Values } from '@aws-cdk/aws-appsync-alpha';
+import * as fs from 'fs';
 
 export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -12,7 +22,7 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
 
     // Using L2 Construct
     const userPool = new UserPool(this, 'TodoUserPool', {
-      selfSignUpEnabled: true,
+      selfSignUpEnabled: false,
       accountRecovery: AccountRecovery.PHONE_AND_EMAIL,
       userVerification: {
         emailStyle: VerificationEmailStyle.CODE
@@ -28,6 +38,13 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
       }
     });
 
+    const userPoolDomain = new UserPoolDomain(this, 'TodoUserPoolDomain', {
+      userPool,
+      cognitoDomain: {
+        domainPrefix: process.env.COGNITO_DOMAIN_PREFIX || ''
+      }
+    });
+
     // Using L1 Construct as adding user group is not supported by L2 Construct
     const userPoolAdminGroup = new CfnUserPoolGroup(this, 'TodoUserPoolAdminGroup', {
       userPoolId: userPool.userPoolId,
@@ -36,7 +53,23 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
     });
 
     const userPoolWebClient = new UserPoolClient(this, 'TodoUserPoolWebClient', {
-      userPool
+      userPool,
+      generateSecret: true,
+      oAuth: {
+        callbackUrls: ['http://localhost:3000/api/auth/callback/cognito'],
+        logoutUrls: ['http://localhost:3000'],
+        flows: {
+          authorizationCodeGrant: true
+        }
+      }
+    });
+
+    const cfnUserPoolUICustomizationAttachment = new CfnUserPoolUICustomizationAttachment(this, 'MyCfnUserPoolUICustomizationAttachment', {
+      clientId: userPoolWebClient.userPoolClientId,
+      userPoolId: userPool.userPoolId,
+      css: Buffer.from(fs.readFileSync('./assets/aws-cognito-login.css')).toString('utf-8')
+      // // Not supported yet, more details: https://github.com/aws/aws-cdk/issues/6953
+      // imageFile: Buffer.from(fs.readFileSync('./assets/stackZone.jpg')),
     });
 
     const todoDynamoDbTable = new Table(this, 'TodoDynamoDbTable', {
@@ -126,10 +159,16 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
       description: 'Todo User Pool Id'
     });
 
-    // User Pool Id
+    // Pool Provider Url
+    new CfnOutput(this, 'TodoUserPoolProviderUrl', {
+      value: userPool.userPoolProviderUrl,
+      description: 'Todo User Pool Provider Url'
+    });
+
+    // Client Pool Id
     new CfnOutput(this, 'TodoUserPoolClientId', {
       value: userPoolWebClient.userPoolClientId,
-      description: 'Todo User Pool Client Id'
+      description: 'Todo User Client Pool Client Id'
     });
 
     // GraphQl Api Key
