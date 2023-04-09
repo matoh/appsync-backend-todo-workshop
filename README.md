@@ -19,3 +19,7 @@ Following services for the backend are used:
 ## Prerequisites
 Create `.env` file as a copy of `.env.example` and fill AWS secrets.  
 
+## Manual configuration after deployment
+
+### Add custom logo for AWS Cognito hosted UI 
+As CDK does not support yet logo for hosted UI, it needs to be added manually.
