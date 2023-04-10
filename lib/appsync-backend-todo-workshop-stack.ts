@@ -61,7 +61,8 @@ export class AppsyncBackendTodoWorkshopStack extends cdk.Stack {
         flows: {
           authorizationCodeGrant: true
         }
-      }
+      },
+      accessTokenValidity: Duration.days(1)
     });
 
     const cfnUserPoolUICustomizationAttachment = new CfnUserPoolUICustomizationAttachment(this, 'MyCfnUserPoolUICustomizationAttachment', {
